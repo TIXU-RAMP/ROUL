@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>10s Expiring Token</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 400px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #222;
+      color: #0f0;
+      text-align: center;
+      border-radius: 8px;
+    }
+    #token {
+      font-size: 1.6rem;
+      font-weight: bold;
+      letter-spacing: 3px;
+      margin: 1rem 0;
+      user-select: all;
+      background: #000;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    #expire {
+      margin-top: 1rem;
+      color: #f44;
+    }
+    button {
+      margin-top: 1rem;
+      font-size: 1rem;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #0f0;
+      color: #000;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Token Generator (10s expiry)</h1>
+  <div id="token">Generating...</div>
+  <div id="expire"></div>
+  <button onclick="generateToken()">Generate New Token</button>
+
+  <script>
+    let currentToken = "";
+    let expireTime = 0;
+    const tokenDiv = document.getElementById("token");
+    const expireDiv = document.getElementById("expire");
+
+    function generateToken(length = 20) {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let token = '';
+      for (let i = 0; i < length; i++) {
+        token += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return token;
+    }
+
+    function updateExpire() {
+      const now = Date.now();
+      const diff = expireTime - now;
+      if (diff <= 0) {
+        expireDiv.textContent = "Token expired!";
+        tokenDiv.style.color = "#f44";
+        return false;
+      }
+      expireDiv.textContent = `Expires in ${(diff / 1000).toFixed(1)} seconds`;
+      setTimeout(updateExpire, 100);
+      return true;
+    }
+
+    function generateTokenAndShow() {
+      currentToken = generateToken();
+      expireTime = Date.now() + 10000; // 10 seconds from now
+      tokenDiv.textContent = currentToken;
+      tokenDiv.style.color = "#0f0";
+      updateExpire();
+    }
+
+    function generateToken() {
+      generateTokenAndShow();
+    }
+
+    generateTokenAndShow();
+  </script>
+
+</body>
+</html>
