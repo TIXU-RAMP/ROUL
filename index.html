@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>10s Token System</title>
+  <title>50s Token System</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -43,10 +43,10 @@
   </style>
 </head>
 <body>
-  <h1>🕙 Token System (10s Expiry)</h1>
+  <h1>🕒 Token System (50s Expiry)</h1>
 
   <section>
-    <button id="generateBtn">Generate 10s Token</button>
+    <button id="generateBtn">Generate 50s Token</button>
     <div class="output" id="generatedToken">No token generated yet.</div>
     <div id="expire"></div>
   </section>
@@ -80,7 +80,7 @@
 
     function generateToken() {
       currentToken = generateUUID();
-      expireTime = Date.now() + 10000; // 10 seconds from now
+      expireTime = Date.now() + 50 * 1000; // 50 seconds expiry
       generatedTokenDiv.textContent = currentToken;
       generatedTokenDiv.style.color = 'green';
       expireDiv.textContent = '';
@@ -90,7 +90,7 @@
 
     document.getElementById('generateBtn').addEventListener('click', generateToken);
 
-    // Generate one token immediately on load
+    // Generate a token immediately on page load
     generateToken();
   </script>
 </body>
