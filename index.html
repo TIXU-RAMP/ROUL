@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>50s Token System</title>
+  <title>50s Token System with URL Token</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,32 +13,39 @@
       border-radius: 8px;
       text-align: center;
     }
-    button, input {
+    button {
       padding: 0.5rem;
       font-size: 1rem;
       margin-top: 0.3rem;
       width: 100%;
       box-sizing: border-box;
+      cursor: pointer;
     }
     section {
       margin-bottom: 2rem;
     }
-    .output {
-      margin-top: 0.8rem;
-      background: #fff;
-      padding: 0.8rem;
-      border-radius: 5px;
+    #generatedToken {
+      margin-top: 1rem;
       font-weight: bold;
-      min-height: 1.5rem;
+      font-family: monospace;
+      font-size: 1.2rem;
+      color: green;
       word-break: break-all;
+    }
+    #expire {
+      margin-top: 0.3rem;
+      color: red;
+      font-weight: normal;
+    }
+    #rawToken {
+      margin-top: 1rem;
       font-family: monospace;
       font-size: 1.1rem;
       color: green;
-    }
-    #expire {
-      color: red;
-      font-weight: normal;
-      margin-top: 0.3rem;
+      background: white;
+      padding: 0.5rem;
+      border-radius: 5px;
+      user-select: all;
     }
   </style>
 </head>
@@ -47,8 +54,9 @@
 
   <section>
     <button id="generateBtn">Generate 50s Token</button>
-    <div class="output" id="generatedToken">No token generated yet.</div>
+    <div id="generatedToken">No token generated yet.</div>
     <div id="expire"></div>
+    <pre id="rawToken" title="Raw token (select and copy)"></pre>
   </section>
 
   <script>
@@ -62,6 +70,9 @@
 
     const generatedTokenDiv = document.getElementById('generatedToken');
     const expireDiv = document.getElementById('expire');
+    const rawTokenPre = document.getElementById('rawToken');
+    const generateBtn = document.getElementById('generateBtn');
+
     let currentToken = '';
     let expireTime = 0;
     let expireInterval = null;
@@ -72,26 +83,55 @@
       if (diff <= 0) {
         expireDiv.textContent = 'Token expired!';
         generatedTokenDiv.style.color = 'red';
+        rawTokenPre.textContent = '';
         clearInterval(expireInterval);
       } else {
         expireDiv.textContent = `Expires in ${(diff / 1000).toFixed(1)}s`;
       }
     }
 
+    function setTokenInURL(token) {
+      const url = new URL(window.location);
+      url.searchParams.set('token', token);
+      window.history.replaceState({}, '', url);
+    }
+
+    function getTokenFromURL() {
+      const url = new URL(window.location);
+      return url.searchParams.get('token');
+    }
+
+    function showToken(token) {
+      generatedTokenDiv.textContent = token;
+      generatedTokenDiv.style.color = 'green';
+      rawTokenPre.textContent = token;
+      expireDiv.textContent = '';
+    }
+
     function generateToken() {
       currentToken = generateUUID();
       expireTime = Date.now() + 50 * 1000; // 50 seconds expiry
-      generatedTokenDiv.textContent = currentToken;
-      generatedTokenDiv.style.color = 'green';
-      expireDiv.textContent = '';
+      showToken(currentToken);
+      setTokenInURL(currentToken);
+
       if (expireInterval) clearInterval(expireInterval);
       expireInterval = setInterval(updateExpire, 100);
     }
 
-    document.getElementById('generateBtn').addEventListener('click', generateToken);
+    window.addEventListener('load', () => {
+      const tokenInURL = getTokenFromURL();
+      if (tokenInURL) {
+        currentToken = tokenInURL;
+        expireTime = Date.now() + 50 * 1000; // reset expiry
+        showToken(currentToken);
+        if (expireInterval) clearInterval(expireInterval);
+        expireInterval = setInterval(updateExpire, 100);
+      } else {
+        generateToken();
+      }
+    });
 
-    // Generate a token immediately on page load
-    generateToken();
+    generateBtn.addEventListener('click', generateToken);
   </script>
 </body>
 </html>
